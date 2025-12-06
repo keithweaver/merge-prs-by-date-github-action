@@ -1,0 +1,21 @@
+name: Scheduled PR Merge
+
+on:
+  schedule:
+    # Run every day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  merge-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Merge PRs by Date
+        uses: ./
+        with:
+          repo_owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}

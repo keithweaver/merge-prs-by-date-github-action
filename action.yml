@@ -1,0 +1,19 @@
+name: 'Merge PRs by Date'
+description: 'Automatically merges pull requests based on dates in their titles'
+author: 'YourName'
+branding:
+  icon: 'git-merge'
+  color: 'green'
+runs:
+  using: docker
+  image: Dockerfile
+inputs:
+  repo_owner:
+    description: "The owner of the repository (username or organization)"
+    required: true
+  repo:
+    description: "The repository name"
+    required: true
+  github_access_token:
+    description: "GitHub access token with repo permissions"
+    required: true
