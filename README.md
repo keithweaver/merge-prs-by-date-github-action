@@ -73,7 +73,7 @@ jobs:
         with:
           repo_owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          github_access_token: ${{ secrets.G_ACCESS_TOKEN }} # Secrets cannot start with GITHUB_
 ```
 
 ### Manual Workflow
@@ -94,7 +94,7 @@ jobs:
         with:
           repo_owner: myorg
           repo: myrepo
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          github_access_token: ${{ secrets.G_ACCESS_TOKEN }} # Secrets cannot start with GITHUB_
 ```
 
 ## Inputs
