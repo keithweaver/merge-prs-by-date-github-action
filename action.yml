@@ -1,9 +1,9 @@
-name: 'Merge PRs by Date'
-description: 'Automatically merges pull requests based on dates in their titles'
-author: 'YourName'
+name: "Merge PRs by Date"
+description: "Automatically merges pull requests based on dates in their titles"
+author: "keithweaver"
 branding:
-  icon: 'git-merge'
-  color: 'green'
+  icon: "git-merge"
+  color: "green"
 runs:
   using: docker
   image: Dockerfile
