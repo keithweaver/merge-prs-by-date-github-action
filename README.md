@@ -90,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: yourusername/merge-prs-by-date-github-action@v1.0.0
+      - uses: keithweaver/merge-prs-by-date-github-action@v1.0.0
         with:
           repo_owner: myorg
           repo: myrepo
@@ -129,7 +129,7 @@ The GitHub token needs the following permissions:
 Build and test locally:
 
 ```bash
-cd /Users/keithweaver/go/src/temp/merge-prs-by-date-github-action
+# cd into repo (merge-prs-by-date-github-action)
 docker build -t pr-merger .
 docker run -e INPUT_REPO_OWNER=owner -e INPUT_REPO=repo -e INPUT_GITHUB_ACCESS_TOKEN=token pr-merger
 ```
