@@ -38,6 +38,7 @@ func main() {
 	now := time.Now()
 	mergedCount := 0
 	skippedCount := 0
+	errorCount := 0
 
 	for _, pr := range allPRs {
 		fmt.Printf("\nProcessing PR #%d: %s\n", pr.Number, pr.Title)
@@ -66,6 +67,7 @@ func main() {
 		if err != nil {
 			fmt.Printf("  Failed to merge: %v\n", err)
 			skippedCount++
+			errorCount++
 			continue
 		}
 
@@ -82,4 +84,8 @@ func main() {
 	fmt.Printf("Total PRs processed: %d\n", len(allPRs))
 	fmt.Printf("PRs merged: %d\n", mergedCount)
 	fmt.Printf("PRs skipped: %d\n", skippedCount)
+
+	if errorCount > 0 {
+		os.Exit(1)
+	}
 }
