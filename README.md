@@ -69,7 +69,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Merge PRs by Date
-        uses: keithweaver/merge-prs-by-date-github-action@v1.0.4
+        uses: keithweaver/merge-prs-by-date-github-action@v1.0.5
         with:
           repo_owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}
@@ -90,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: keithweaver/merge-prs-by-date-github-action@v1.0.3
+      - uses: keithweaver/merge-prs-by-date-github-action@v1.0.5
         with:
           repo_owner: myorg
           repo: myrepo
