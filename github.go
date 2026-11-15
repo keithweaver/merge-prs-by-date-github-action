@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 const (
@@ -15,19 +16,21 @@ const (
 
 // GitHubClient handles GitHub API requests
 type GitHubClient struct {
-	token     string
-	repoOwner string
-	repo      string
-	client    *http.Client
+	token       string
+	repoOwner   string
+	repo        string
+	client      *http.Client
+	mergeMethod string
 }
 
 // NewGitHubClient creates a new GitHub API client
 func NewGitHubClient(token, repoOwner, repo string) *GitHubClient {
 	return &GitHubClient{
-		token:     token,
-		repoOwner: repoOwner,
-		repo:      repo,
-		client:    &http.Client{},
+		token:       token,
+		repoOwner:   repoOwner,
+		repo:        repo,
+		client:      &http.Client{Timeout: 30 * time.Second},
+		mergeMethod: "merge",
 	}
 }
 
@@ -94,13 +97,18 @@ func (c *GitHubClient) getPullRequestsPage(page int) ([]PullRequest, error) {
 
 // MergePullRequest merges a pull request
 func (c *GitHubClient) MergePullRequest(prNumber int, prTitle string) (bool, error) {
+	return c.MergePullRequestAtSHA(prNumber, prTitle, "")
+}
+
+func (c *GitHubClient) MergePullRequestAtSHA(prNumber int, prTitle, headSHA string) (bool, error) {
 	url := fmt.Sprintf("%s/repos/%s/%s/pulls/%d/merge",
 		githubAPIBaseURL, c.repoOwner, c.repo, prNumber)
 
 	mergeReq := MergeRequest{
 		CommitTitle:   fmt.Sprintf("Auto-merge: %s", prTitle),
 		CommitMessage: "Automatically merged by date-based PR merger",
-		MergeMethod:   "merge",
+		MergeMethod:   c.mergeMethod,
+		Sha:           headSHA,
 	}
 
 	jsonData, err := json.Marshal(mergeReq)
