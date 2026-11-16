@@ -263,3 +263,61 @@ func TestDatesUseConfiguredTimezoneAndSupportedTitleFormats(t *testing.T) {
 		t.Fatal("accepted undated title")
 	}
 }
+
+func TestSeparateTokenForCheckReadsOnly(t *testing.T) {
+	c := NewGitHubClient("write-token", "owner", "repo")
+	c.checksToken = "checks-token"
+	seen := map[string]string{}
+	c.client.Transport = transportFunc(func(r *http.Request) (*http.Response, error) {
+		path := strings.TrimPrefix(r.URL.Path, "/repos/owner/repo")
+		expected := "Bearer write-token"
+		if strings.HasPrefix(path, "/commits/") {
+			expected = "Bearer checks-token"
+		}
+		if r.Header.Get("Authorization") != expected {
+			t.Fatalf("wrong token for %s", path)
+		}
+		seen[path] = expected
+		switch {
+		case strings.HasSuffix(path, "/status"):
+			return reply(map[string]any{"state": "success", "total_count": 1}), nil
+		case strings.HasSuffix(path, "/check-runs"):
+			return reply(map[string]any{"check_runs": []map[string]string{{"status": "completed", "conclusion": "success"}}}), nil
+		case strings.HasSuffix(path, "/merge"):
+			return reply(MergeResponse{Merged: true}), nil
+		case path == "/pulls/1":
+			return reply(map[string]string{}), nil
+		}
+		t.Fatalf("unexpected path %s", path)
+		return nil, nil
+	})
+	if ok, err := c.ChecksPassed("head"); err != nil || !ok {
+		t.Fatalf("checks: %v %v", ok, err)
+	}
+	if err := c.Retarget(1, "main"); err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := c.MergePullRequestAtSHA(1, "title", "head"); err != nil || !ok {
+		t.Fatalf("merge: %v %v", ok, err)
+	}
+	if len(seen) != 4 {
+		t.Fatalf("expected four endpoints, got %v", seen)
+	}
+}
+
+func TestAllSkippedPRsAreExplainedAndSummarized(t *testing.T) {
+	draft := readyPR(1, "[Nov 14 2026] draft")
+	draft.Draft = true
+	f := successful(draft, readyPR(2, "[Nov 16 2026] future"), readyPR(3, "No date"))
+	var lines []string
+	err := Run(f.client(t), time.Date(2026, 11, 15, 12, 0, 0, 0, time.UTC), func(format string, args ...any) { lines = append(lines, fmt.Sprintf(format, args...)) })
+	if err != nil {
+		t.Fatal(err)
+	}
+	output := strings.Join(lines, "\n")
+	for _, want := range []string{"#1: skipped: draft", "#2: skipped: date 2026-11-16 is in the future", "#3: skipped: no recognized date", "Summary: scanned=3 merged=0 retargeted=0 skipped=3 errors=0"} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("missing %q from %s", want, output)
+		}
+	}
+}

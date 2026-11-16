@@ -19,6 +19,9 @@ func main() {
 	time.Local = location
 	client := NewGitHubClient(token, owner, repo)
 	client.mergeMethod = method
+	if token := os.Getenv("CHECKS_TOKEN"); token != "" {
+		client.checksToken = token
+	}
 	if err := Run(client, time.Now().In(location), log.Printf); err != nil {
 		log.Fatal(err)
 	}

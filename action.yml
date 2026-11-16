@@ -25,3 +25,6 @@ inputs:
     description: "IANA timezone used for dates in PR titles"
     required: false
     default: "UTC"
+  checks_token:
+    description: "Token for reading statuses/check runs; use github.token with checks:read and statuses:read. Defaults to github_access_token."
+    required: false

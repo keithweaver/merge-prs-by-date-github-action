@@ -17,6 +17,7 @@ const (
 // GitHubClient handles GitHub API requests
 type GitHubClient struct {
 	token       string
+	checksToken string
 	repoOwner   string
 	repo        string
 	client      *http.Client
@@ -27,6 +28,7 @@ type GitHubClient struct {
 func NewGitHubClient(token, repoOwner, repo string) *GitHubClient {
 	return &GitHubClient{
 		token:       token,
+		checksToken: token,
 		repoOwner:   repoOwner,
 		repo:        repo,
 		client:      &http.Client{Timeout: 30 * time.Second},

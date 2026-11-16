@@ -173,3 +173,13 @@ their checks before the next attempt.
 The GitHub token needs repository read access (including checks and commit
 statuses), pull-request write access for retargeting, and contents write access
 for merges. The action never runs code from a PR branch.
+
+### Separate check-reading token
+
+Fine-grained PATs cannot access the check-runs endpoint. Set `checks_token` to
+`${{ github.token }}` and grant that workflow token `checks: read` and
+`statuses: read`. Keep `github_access_token` set to your PAT for merges and PR
+retargeting so those writes can still trigger downstream workflows. If
+`checks_token` is omitted, the action preserves its single-token behavior.
+
+Each run logs skipped PRs and a scanned/merged/retargeted/skipped/error summary.

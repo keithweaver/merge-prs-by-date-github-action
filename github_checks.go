@@ -10,6 +10,10 @@ import (
 )
 
 func (c *GitHubClient) api(method, path string, body, result any) error {
+	return c.apiWithToken(method, path, c.token, body, result)
+}
+
+func (c *GitHubClient) apiWithToken(method, path, token string, body, result any) error {
 	var reader io.Reader
 	if body != nil {
 		data, err := json.Marshal(body)
@@ -23,7 +27,7 @@ func (c *GitHubClient) api(method, path string, body, result any) error {
 		return err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
@@ -87,7 +91,7 @@ func (c *GitHubClient) ChecksPassed(sha string) (bool, error) {
 		State string `json:"state"`
 		Total int    `json:"total_count"`
 	}
-	if err := c.api("GET", "/commits/"+sha+"/status", nil, &statuses); err != nil {
+	if err := c.apiWithToken("GET", "/commits/"+sha+"/status", c.checksToken, nil, &statuses); err != nil {
 		return false, err
 	}
 	if statuses.Total > 0 && statuses.State != "success" {
@@ -101,7 +105,7 @@ func (c *GitHubClient) ChecksPassed(sha string) (bool, error) {
 				Conclusion string `json:"conclusion"`
 			} `json:"check_runs"`
 		}
-		if err := c.api("GET", fmt.Sprintf("/commits/%s/check-runs?filter=latest&per_page=100&page=%d", sha, page), nil, &checks); err != nil {
+		if err := c.apiWithToken("GET", fmt.Sprintf("/commits/%s/check-runs?filter=latest&per_page=100&page=%d", sha, page), c.checksToken, nil, &checks); err != nil {
 			return false, err
 		}
 		count += len(checks.Runs)
