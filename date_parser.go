@@ -100,10 +100,10 @@ func parseDate(dateStr string) time.Time {
 	}
 
 	for _, format := range formats {
-		if parsed, err := time.Parse(format, dateStr); err == nil {
+		if parsed, err := time.ParseInLocation(format, dateStr, time.Local); err == nil {
 			// If the format doesn't include a year, add the current year
 			if !strings.Contains(format, "2006") && !strings.Contains(format, "06") {
-				parsed = time.Date(currentYear, parsed.Month(), parsed.Day(), 0, 0, 0, 0, time.UTC)
+				parsed = time.Date(currentYear, parsed.Month(), parsed.Day(), 0, 0, 0, 0, time.Local)
 			}
 			return parsed
 		}

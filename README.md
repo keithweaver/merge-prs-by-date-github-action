@@ -147,3 +147,39 @@ docker run -e INPUT_REPO_OWNER=owner -e INPUT_REPO=repo -e INPUT_GITHUB_ACCESS_T
 ## License
 
 MIT
+
+## Merge strategy, timezone, and stacked PRs
+
+Optional inputs:
+
+| Input | Default | Behavior |
+| --- | --- | --- |
+| `merge_method` | `merge` | `merge`, `squash`, or `rebase`; use `squash` for squash-only repositories. |
+| `timezone` | `UTC` | IANA timezone used for dates, for example `America/Toronto`. |
+
+The action processes all due, non-draft PRs oldest first. It uses the repository's
+default branch and requires successful status checks and completed check runs
+before merging. Pending, failing, conflicting, or not-yet-evaluated PRs wait for
+the next scheduled run. The merge request includes the inspected head SHA so a
+concurrent push cannot merge untested code.
+
+A stacked PR is never merged into its parent branch. Once the exact PR backing
+its base branch has merged into the default branch, the action retargets the child
+to the default branch and waits for a later run before merging it. No series
+manifest, hardcoded branch names, force pushes, or repository-specific workflow
+is needed. Keep your workflow on a recurring schedule so retargeted PRs can finish
+their checks before the next attempt.
+
+The GitHub token needs repository read access (including checks and commit
+statuses), pull-request write access for retargeting, and contents write access
+for merges. The action never runs code from a PR branch.
+
+### Separate check-reading token
+
+Fine-grained PATs cannot access the check-runs endpoint. Set `checks_token` to
+`${{ github.token }}` and grant that workflow token `checks: read` and
+`statuses: read`. Keep `github_access_token` set to your PAT for merges and PR
+retargeting so those writes can still trigger downstream workflows. If
+`checks_token` is omitted, the action preserves its single-token behavior.
+
+Each run logs skipped PRs and a scanned/merged/retargeted/skipped/error summary.

@@ -15,6 +15,8 @@ RUN go build -o pr-merger .
 # Runtime stage
 FROM alpine:latest
 
+RUN apk add --no-cache ca-certificates
+
 WORKDIR /app
 
 # Copy the binary from builder
